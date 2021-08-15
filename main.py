@@ -1,40 +1,49 @@
 from bottle import route, run, template, static_file
 import sys
 
+PORT = 8080
+
 file_path = sys.argv[1]
+
+context = {
+    'integer': 0,
+    'html': ''
+}
 
 integer = 0
 html = ''
 with open('index.html', 'r') as f:
-    html = f.read()
+    context['html'] = f.read()
+
+
+def select_image(number):
+    if 0 <= number <= 24:
+        return '/static/dog.png'
+    if 25 <= number <= 49:
+        return '/static/cock.png'
+    if 50 <= number <= 74:
+        return '/static/bull.png'
+    if 75 <= number <= 99:
+        return '/static/deer.png'
 
 @route('/')
 def index():
-    number = 0
     with open(file_path, 'r') as f:
         number = f.read()
 
     try:
-        integer = int(number.strip().split(',')[-1][0:2])
+        context['integer'] = int(number.strip().split(',')[-1][0:2])
+        print(context['integer'])
     except TypeError:
-        integer = 0
-        print(number)
+        pass
     except ValueError:
-        integer = 0
-        print(number)
+        pass
 
-    if 0 <= integer <= 24:
-        image = '/static/dog.png'
-    if 25 <= integer <= 49:
-        image = '/static/cock.png'
-    if 50 <= integer <= 74:
-        image = '/static/bull.png'
-    if 75 <= integer <= 99:
-        image = '/static/deer.png'
-    return template(html, image=image)
+    image = select_image(context['integer'])
+    return template(context['html'], image=image)
 
 @route('/static/<filename>')
 def server_static(filename):
-    return static_file(filename, root='./')
+    return static_file(filename, root='./images')
 
-run(host='localhost', port=8080)
+run(host='localhost', port=PORT)
