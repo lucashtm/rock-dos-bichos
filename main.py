@@ -10,8 +10,6 @@ context = {
     'html': ''
 }
 
-integer = 0
-html = ''
 with open('index.html', 'r') as f:
     context['html'] = f.read()
 
@@ -26,21 +24,25 @@ def select_image(number):
     if 75 <= number <= 99:
         return '/static/deer.png'
 
-@route('/')
-def index():
+def get_number_from_file():
     with open(file_path, 'r') as f:
         number = f.read()
+    return int(number.strip().split(',')[-1][0:2])
 
+def find_image():
     try:
-        context['integer'] = int(number.strip().split(',')[-1][0:2])
+        context['integer'] = get_number_from_file()
         print(context['integer'])
     except TypeError:
         pass
     except ValueError:
         pass
 
-    image = select_image(context['integer'])
-    return template(context['html'], image=image)
+    return select_image(context['integer'])
+
+@route('/')
+def index():
+    return template(context['html'], image=find_image())
 
 @route('/static/<filename>')
 def server_static(filename):
